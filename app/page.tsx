@@ -1,4 +1,3 @@
-import Image from "next/image";
 import Link from "next/link";
 
 export default function Home() {
@@ -30,7 +29,7 @@ export default function Home() {
             <span className="text-blue-600"> Virtual Fitting</span>
           </h1>
           <p className="text-xl text-gray-600 dark:text-gray-300 mb-8 max-w-3xl mx-auto">
-            Create your 3D Digital Twin and try on clothes virtually. Reduce returns, increase confidence, and shop smarter with v-FIT's revolutionary virtual fitting room technology.
+            Create your 3D Digital Twin and try on clothes virtually. Reduce returns, increase confidence, and shop smarter with v-FIT&apos;s revolutionary virtual fitting room technology.
           </p>
           
           <div className="flex gap-4 items-center justify-center flex-col sm:flex-row">

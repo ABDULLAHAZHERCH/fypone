@@ -19,7 +19,7 @@ export default function Settings() {
     }
   });
 
-  const handleSettingChange = (section: string, field: string, value: any) => {
+  const handleSettingChange = (section: string, field: string, value: unknown) => {
     setUserSettings(prev => {
       if (section === 'avatar' && typeof prev.avatar === 'object') {
         return {
@@ -34,11 +34,21 @@ export default function Settings() {
     });
   };
 
-  const handleBasicChange = (field: string, value: any) => {
+  const handleBasicChange = (field: string, value: unknown) => {
     setUserSettings(prev => ({
       ...prev,
       [field]: value
     }));
+  };
+
+  const handleProfileUpdate = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    console.log('Updating profile settings:', userSettings);
+  };
+
+  const handlePasswordChange = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    console.log('Changing password');
   };
 
   return (

@@ -1,12 +1,12 @@
 'use client';
 import { Suspense, useState, useEffect, useRef } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { Canvas, useFrame, useThree } from '@react-three/fiber';
-import { useGLTF, OrbitControls, Environment, useAnimations } from '@react-three/drei';
+import { Canvas } from '@react-three/fiber';
+import { useGLTF, OrbitControls, Environment } from '@react-three/drei';
 import { Physics, RigidBody, CuboidCollider, useRapier } from '@react-three/rapier';
 import * as THREE from 'three';
 import AppLayout from '../../components/AppLayout';
-import { ClothingItem, SavedOutfit, getClothingCatalog } from '../../lib/clothing-catalog';
+import { ClothingItem, getClothingCatalog } from '../../lib/clothing-catalog';
 
 // Model component interfaces
 
@@ -42,7 +42,7 @@ function ClothModel({
   const { rapier, world } = useRapier();
   
   // Cloth physics state
-  const constraintsRef = useRef<any[]>([]);
+  const constraintsRef = useRef<unknown[]>([]);
   
   // Simplified physics setup - just render the model with basic physics wrapper
   useEffect(() => {
@@ -162,8 +162,12 @@ export default function InteractiveStyleStudio() {
 
   // Load clothing catalog
   useEffect(() => {
-    const catalog = getClothingCatalog();
-    setClothingCatalog(catalog);
+    const loadData = async () => {
+      const catalog = getClothingCatalog();
+      setClothingCatalog(catalog);
+    };
+    
+    loadData();
   }, []);
 
   // Movement controls
@@ -213,7 +217,7 @@ export default function InteractiveStyleStudio() {
       // For demo, load some items
       setStagingItems([clothingCatalog[0], clothingCatalog[1]]);
     }
-  }, [searchParams]);
+  }, [searchParams, clothingCatalog]);
 
   const addToAvatar = (item: ClothingItem) => {
     // Remove any existing item of the same category
@@ -371,9 +375,17 @@ export default function InteractiveStyleStudio() {
                   <ClothModel 
                     key={item.id}
                     url={item.url}
-                    position={item.position}
-                    scale={item.scale}
-                    rotation={item.rotation}
+                    position={[
+                      avatarPosition[0] + (item.position?.[0] || 0),
+                      avatarPosition[1] + (item.position?.[1] || 0),
+                      avatarPosition[2] + (item.position?.[2] || 0)
+                    ]}
+                    scale={item.scale || 1}
+                    rotation={[
+                      avatarRotation[0] + (item.rotation?.[0] || 0),
+                      avatarRotation[1] + (item.rotation?.[1] || 0),
+                      avatarRotation[2] + (item.rotation?.[2] || 0)
+                    ]}
                     enablePhysics={physicsEnabled}
                     physicsProps={item.physics}
                     avatarRef={avatarRef}
@@ -673,7 +685,7 @@ export default function InteractiveStyleStudio() {
             ) : (
               <div className="text-center text-gray-500 mt-8">
                 <div className="text-4xl mb-2">👕</div>
-                <p>Click on an item you're wearing to see details and styling options</p>
+                <p>Click on an item you&apos;re wearing to see details and styling options</p>
               </div>
             )}
 

@@ -13,7 +13,6 @@ export default function Wardrobe() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedBrands, setSelectedBrands] = useState<string[]>([]);
   const [selectedColors, setSelectedColors] = useState<string[]>([]);
-  const [selectedItem, setSelectedItem] = useState<ClothingItem | null>(null);
   const [clothingItems, setClothingItems] = useState<ClothingItem[]>([]);
   const [savedOutfits, setSavedOutfits] = useState<SavedOutfit[]>([]);
 
@@ -102,7 +101,7 @@ export default function Wardrobe() {
               ].map((tab) => (
                 <button
                   key={tab.id}
-                  onClick={() => setActiveTab(tab.id as any)}
+                  onClick={() => setActiveTab(tab.id as 'items' | 'outfits' | 'wishlist')}
                   className={`px-3 py-2 rounded text-sm font-medium transition-colors ${
                     activeTab === tab.id
                       ? 'bg-blue-600 text-white'
@@ -252,10 +251,9 @@ export default function Wardrobe() {
                   <div
                     key={item.id}
                     className="bg-white dark:bg-gray-800 rounded-xl shadow-sm hover:shadow-md transition-shadow group cursor-pointer"
-                    onClick={() => setSelectedItem(item)}
                   >
                     <div className="relative">
-                      <div className="aspect-square bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-600 rounded-t-xl overflow-hidden">
+                      <div className="h-64 bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-600 rounded-t-xl overflow-hidden">
                         <Mini3DCanvas item={item} className="w-full h-full" />
                       </div>
                       
@@ -272,25 +270,12 @@ export default function Wardrobe() {
                           </span>
                         )}
                       </div>
-                      
-                      {/* Hover Actions */}
-                      <div className="absolute inset-0 bg-black bg-opacity-50 opacity-0 group-hover:opacity-100 transition-opacity rounded-t-xl flex items-center justify-center space-x-2">
-                        <Link
-                          href={`/fitting-room?item=${item.id}`}
-                          className="bg-blue-600 text-white px-3 py-2 rounded-lg text-sm hover:bg-blue-700 transition-colors"
-                        >
-                          🎭 Try On
-                        </Link>
-                        <button className="bg-white text-gray-800 px-3 py-2 rounded-lg text-sm hover:bg-gray-100 transition-colors">
-                          ♡
-                        </button>
-                      </div>
                     </div>
                     
                     <div className="p-4">
                       <h3 className="font-semibold text-foreground mb-1">{item.name}</h3>
                       <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">{item.brand}</p>
-                      <div className="flex justify-between items-center">
+                      <div className="flex justify-between items-center mb-3">
                         <div className="flex space-x-1 text-xs">
                           <span className="bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded">{item.color}</span>
                           {item.size && (
@@ -298,6 +283,15 @@ export default function Wardrobe() {
                           )}
                         </div>
                       </div>
+                      
+                      {/* Try On Button */}
+                      <Link
+                        href={`/fitting-room?item=${item.id}`}
+                        className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors flex items-center justify-center"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        🎭 Try On
+                      </Link>
                     </div>
                   </div>
                 ))}
