@@ -1,5 +1,5 @@
 'use client';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import AppLayout from '../../components/AppLayout';
@@ -7,6 +7,23 @@ import Mini3DCanvas from '../../components/Mini3DCanvas';
 import { ClothingItem, SavedOutfit, getClothingCatalog, getSavedOutfits } from '../../lib/clothing-catalog';
 
 export default function Wardrobe() {
+  return (
+    <Suspense fallback={
+      <AppLayout>
+        <div className="flex h-full items-center justify-center">
+          <div className="text-center">
+            <div className="text-4xl mb-4">👔</div>
+            <div className="text-lg text-gray-600 dark:text-gray-400">Loading wardrobe...</div>
+          </div>
+        </div>
+      </AppLayout>
+    }>
+      <WardrobeContent />
+    </Suspense>
+  );
+}
+
+function WardrobeContent() {
   const searchParams = useSearchParams();
   const [activeCategory, setActiveCategory] = useState<string>('all');
   const [activeTab, setActiveTab] = useState<'items' | 'outfits' | 'wishlist'>('items');
@@ -253,7 +270,7 @@ export default function Wardrobe() {
                     className="bg-white dark:bg-gray-800 rounded-xl shadow-sm hover:shadow-md transition-shadow group cursor-pointer"
                   >
                     <div className="relative">
-                      <div className="h-64 bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-600 rounded-t-xl overflow-hidden">
+                      <div className="h-35 bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-600 rounded-t-xl overflow-hidden">
                         <Mini3DCanvas item={item} className="w-full h-full" />
                       </div>
                       

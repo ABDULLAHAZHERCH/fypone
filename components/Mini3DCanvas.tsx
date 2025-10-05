@@ -105,6 +105,7 @@ function Model3DPopup({ item, isOpen, onClose }: {
         <div className="w-full h-96 bg-gradient-to-b from-gray-50 to-gray-100 dark:from-gray-700 dark:to-gray-800 rounded-lg overflow-hidden">
           {!hasError && (
             <Canvas
+              key={`popup-canvas-${item.id}`}
               camera={{ position: [0, 0, 3], fov: 45 }}
               className="w-full h-full"
             >
@@ -127,7 +128,7 @@ function Model3DPopup({ item, isOpen, onClose }: {
               <Suspense fallback={null}>
                 <ClothingModel 
                   url={item.url}
-                  position={item.position || [0, 0, 0]}
+                  position={[0, -1, 0]}
                   scale={item.scale || 1}
                   rotation={item.rotation || [0, 0, 0]}
                   onLoad={handleLoad}
@@ -180,6 +181,12 @@ export default function Mini3DCanvas({ item, className = "" }: Mini3DCanvasProps
     }
   };
 
+  // Reset loading state when item changes
+  useEffect(() => {
+    setIsLoading(true);
+    setHasError(false);
+  }, [item.url]);
+
   return (
     <>
       <div 
@@ -188,6 +195,7 @@ export default function Mini3DCanvas({ item, className = "" }: Mini3DCanvasProps
       >
         {!hasError && (
           <Canvas
+            key={`mini-canvas-${item.id}`}
             camera={{ position: [0, 0, 2.5], fov: 45 }}
             className="w-full h-full"
           >
@@ -201,7 +209,7 @@ export default function Mini3DCanvas({ item, className = "" }: Mini3DCanvasProps
             <Suspense fallback={null}>
               <ClothingModel 
                 url={item.url}
-                position={item.position || [0, 0, 0]}
+                position={[0, -1, 0]} // Center the model better
                 scale={item.scale || 1}
                 rotation={item.rotation || [0, 0, 0]}
                 onLoad={handleLoad}

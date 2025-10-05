@@ -1,5 +1,5 @@
 'use client';
-import { Suspense, useState, useEffect, useRef } from 'react';
+import { Suspense, useState, useEffect, useRef, Component } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { Canvas } from '@react-three/fiber';
 import { useGLTF, OrbitControls, Environment } from '@react-three/drei';
@@ -7,6 +7,46 @@ import { Physics, RigidBody, CuboidCollider, useRapier } from '@react-three/rapi
 import * as THREE from 'three';
 import AppLayout from '../../components/AppLayout';
 import { ClothingItem, getClothingCatalog } from '../../lib/clothing-catalog';
+
+// Error boundary for Canvas
+class CanvasErrorBoundary extends Component<
+  { children: React.ReactNode; fallback?: React.ReactNode },
+  { hasError: boolean }
+> {
+  constructor(props: { children: React.ReactNode; fallback?: React.ReactNode }) {
+    super(props);
+    this.state = { hasError: false };
+  }
+
+  static getDerivedStateFromError() {
+    return { hasError: true };
+  }
+
+  componentDidCatch(error: Error) {
+    console.error('Canvas Error:', error);
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return this.props.fallback || (
+        <div className="flex items-center justify-center h-full bg-gray-100 dark:bg-gray-800">
+          <div className="text-center">
+            <div className="text-4xl mb-2">⚠️</div>
+            <div className="text-lg text-gray-600 dark:text-gray-400">3D Viewer Error</div>
+            <button 
+              onClick={() => this.setState({ hasError: false })}
+              className="mt-2 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+            >
+              Reload
+            </button>
+          </div>
+        </div>
+      );
+    }
+
+    return this.props.children;
+  }
+}
 
 // Model component interfaces
 
@@ -39,7 +79,7 @@ function ClothModel({
   const clothRef = useRef<THREE.Mesh>(null);
   const { scene } = useGLTF(url);
   const clonedScene = scene.clone();
-  const { rapier, world } = useRapier();
+  const { world } = useRapier();
   
   // Cloth physics state
   const constraintsRef = useRef<unknown[]>([]);
@@ -146,12 +186,29 @@ function FitAnalysisOverlay({ item, isVisible }: { item: ClothingItem | null; is
 }
 
 export default function InteractiveStyleStudio() {
+  return (
+    <Suspense fallback={
+      <AppLayout>
+        <div className="flex h-full items-center justify-center">
+          <div className="text-center">
+            <div className="text-4xl mb-4">👕</div>
+            <div className="text-lg text-gray-600 dark:text-gray-400">Loading fitting room...</div>
+          </div>
+        </div>
+      </AppLayout>
+    }>
+      <FittingRoomContent />
+    </Suspense>
+  );
+}
+
+function FittingRoomContent() {
   const searchParams = useSearchParams();
   const [stagingItems, setStagingItems] = useState<ClothingItem[]>([]);
   const [currentOutfit, setCurrentOutfit] = useState<ClothingItem[]>([]);
   const [selectedItem, setSelectedItem] = useState<ClothingItem | null>(null);
   const [showFitAnalysis, setShowFitAnalysis] = useState(false);
-  const [physicsEnabled, setPhysicsEnabled] = useState(true);
+  const [physicsEnabled, setPhysicsEnabled] = useState(false); // Temporarily disabled
   const [showClothingBrowser, setShowClothingBrowser] = useState(false);
   const [clothingCatalog, setClothingCatalog] = useState<ClothingItem[]>([]);
   const avatarRef = useRef<THREE.Group>(null);
@@ -336,10 +393,15 @@ export default function InteractiveStyleStudio() {
 
         {/* CENTER PANEL - The Canvas */}
         <div className="flex-1 relative bg-gradient-to-b from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-900">
-          <Canvas 
-            camera={{ position: [0, 0, 3], fov: 50 }}
-            className="w-full h-full"
-          >
+          <CanvasErrorBoundary>
+            <Canvas 
+              key="fitting-room-canvas"
+              camera={{ position: [0, 0, 3], fov: 50 }}
+              className="w-full h-full"
+              onError={(error) => {
+                console.error('Canvas Error:', error);
+              }}
+            >
             {/* Studio Lighting */}
             <ambientLight intensity={0.4} />
             <directionalLight position={[5, 5, 5]} intensity={1} castShadow />
@@ -399,89 +461,7 @@ export default function InteractiveStyleStudio() {
               </Suspense>
             </Physics>
           </Canvas>
-
-          {/* Physics Toggle - Top Right */}
-          <div className="absolute top-4 right-4 bg-white dark:bg-gray-800 rounded-full shadow-lg p-1">
-            <button
-              onClick={() => setPhysicsEnabled(!physicsEnabled)}
-              className={`p-3 rounded-full transition-colors text-xl ${
-                physicsEnabled
-                  ? 'bg-green-100 dark:bg-green-900 text-green-600 dark:text-green-300'
-                  : 'bg-gray-100 dark:bg-gray-700 text-foreground hover:bg-gray-200 dark:hover:bg-gray-600'
-              }`}
-              title={`Physics ${physicsEnabled ? 'ON' : 'OFF'} - Toggle realistic cloth simulation`}
-            >
-              {physicsEnabled ? '🧪' : '⚙️'}
-            </button>
-          </div>
-
-          {/* Movement Controls - Horizontal Icons Only */}
-          <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 bg-white dark:bg-gray-800 rounded-full shadow-lg p-2">
-            <div className="flex items-center gap-1">
-              {/* Move Left */}
-              <button
-                onClick={() => moveAvatar('left')}
-                className="p-3 rounded-full bg-gray-100 dark:bg-gray-700 text-foreground hover:bg-blue-100 dark:hover:bg-blue-800 hover:text-blue-600 dark:hover:text-blue-300 transition-colors text-xl"
-                title="Move Left"
-              >
-                ⬅️
-              </button>
-              
-              {/* Move Forward */}
-              <button
-                onClick={() => moveAvatar('forward')}
-                className="p-3 rounded-full bg-gray-100 dark:bg-gray-700 text-foreground hover:bg-blue-100 dark:hover:bg-blue-800 hover:text-blue-600 dark:hover:text-blue-300 transition-colors text-xl"
-                title="Move Forward"
-              >
-                ⬆️
-              </button>
-              
-              {/* Reset Position */}
-              <button
-                onClick={resetAvatarPosition}
-                className="p-3 rounded-full bg-yellow-100 dark:bg-yellow-900 text-yellow-600 dark:text-yellow-300 hover:bg-yellow-200 dark:hover:bg-yellow-800 transition-colors text-xl"
-                title="Reset Position"
-              >
-                🏠
-              </button>
-              
-              {/* Move Backward */}
-              <button
-                onClick={() => moveAvatar('back')}
-                className="p-3 rounded-full bg-gray-100 dark:bg-gray-700 text-foreground hover:bg-blue-100 dark:hover:bg-blue-800 hover:text-blue-600 dark:hover:text-blue-300 transition-colors text-xl"
-                title="Move Backward"
-              >
-                ⬇️
-              </button>
-              
-              {/* Move Right */}
-              <button
-                onClick={() => moveAvatar('right')}
-                className="p-3 rounded-full bg-gray-100 dark:bg-gray-700 text-foreground hover:bg-blue-100 dark:hover:bg-blue-800 hover:text-blue-600 dark:hover:text-blue-300 transition-colors text-xl"
-                title="Move Right"
-              >
-                ➡️
-              </button>
-              
-              {/* Rotate Left */}
-              <button
-                onClick={() => rotateAvatar('left')}
-                className="p-3 rounded-full bg-green-100 dark:bg-green-900 text-green-600 dark:text-green-300 hover:bg-green-200 dark:hover:bg-green-800 transition-colors text-xl"
-                title="Rotate Left"
-              >
-                ↪️
-              </button>
-              
-              {/* Rotate Right */}
-              <button
-                onClick={() => rotateAvatar('right')}
-                className="p-3 rounded-full bg-green-100 dark:bg-green-900 text-green-600 dark:text-green-300 hover:bg-green-200 dark:hover:bg-green-800 transition-colors text-xl"
-                title="Rotate Right"
-              >
-                ↩️
-              </button>
-            </div>
-          </div>
+          </CanvasErrorBoundary>
 
           {/* Fit Analysis Overlay */}
           <FitAnalysisOverlay item={selectedItem} isVisible={showFitAnalysis} />
@@ -735,8 +715,8 @@ export default function InteractiveStyleStudio() {
               <h2 className="text-xl font-bold text-foreground">Browse Clothing</h2>
               <button
                 onClick={() => setShowClothingBrowser(false)}
-                className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
-              >
+                className="text-gray-500 hove   r:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+              > 
                 ✕
               </button>
             </div>
@@ -774,6 +754,6 @@ export default function InteractiveStyleStudio() {
   );
 }
 
-// Preload common models
-useGLTF.preload('/tshirt.glb');
-useGLTF.preload('/jacket.glb');
+// // Preload common models
+// useGLTF.preload('/tshirt.glb');
+// useGLTF.preload('/jacket.glb');

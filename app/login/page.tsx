@@ -19,7 +19,7 @@ export default function Login() {
     try {
       await signInWithEmailAndPassword(auth, email, password);
       router.push('/fitting-room'); // Redirect to fitting room after login
-    } catch (error: any) {
+    } catch (error: unknown) {
       setError('Invalid email or password');
       console.error('Error signing in:', error);
     } finally {
@@ -71,7 +71,7 @@ export default function Login() {
         </form>
         
         <p className="mt-4 text-center text-foreground">
-          Don't have an account?{' '}
+          Don&apos;t have an account?{' '}
           <button
             onClick={() => router.push('/signup')}
             className="text-blue-500 hover:underline"

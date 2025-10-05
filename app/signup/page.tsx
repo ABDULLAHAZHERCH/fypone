@@ -19,8 +19,8 @@ export default function SignUp() {
     try {
       await createUserWithEmailAndPassword(auth, email, password);
       router.push('/create-avatar'); // Redirect to avatar creation after signup
-    } catch (error: any) {
-      setError(error.message);
+    } catch (error: unknown) {
+      setError(error instanceof Error ? error.message : 'An error occurred');
       console.error('Error signing up:', error);
     } finally {
       setLoading(false);

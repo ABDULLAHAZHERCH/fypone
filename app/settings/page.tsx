@@ -4,17 +4,17 @@ import AppLayout from '../../components/AppLayout';
 
 export default function Settings() {
   const [userSettings, setUserSettings] = useState({
-    name: 'Abdullah',
-    email: 'abdullah@example.com',
+    name: '',
+    email: '',
     notifications: true,
     darkMode: false,
     avatar: {
-      height: '175',
-      weight: '70',
+      height: '',
+      weight: '',
       measurements: {
-        chest: '40',
-        waist: '32',
-        hips: '38'
+        chest: '',
+        waist: '',
+        hips: ''
       }
     }
   });
@@ -41,16 +41,6 @@ export default function Settings() {
     }));
   };
 
-  const handleProfileUpdate = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    console.log('Updating profile settings:', userSettings);
-  };
-
-  const handlePasswordChange = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    console.log('Changing password');
-  };
-
   return (
     <AppLayout>
       <div className="p-6 max-w-4xl mx-auto">
@@ -73,6 +63,7 @@ export default function Settings() {
                 </label>
                 <input
                   type="text"
+                  placeholder="Enter your full name"
                   value={userSettings.name}
                   onChange={(e) => handleBasicChange('name', e.target.value)}
                   className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-foreground"
@@ -85,6 +76,7 @@ export default function Settings() {
                 </label>
                 <input
                   type="email"
+                  placeholder="Enter your email address"
                   value={userSettings.email}
                   onChange={(e) => handleBasicChange('email', e.target.value)}
                   className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-foreground"
@@ -104,6 +96,7 @@ export default function Settings() {
                 </label>
                 <input
                   type="number"
+                  placeholder="175"
                   value={userSettings.avatar.height}
                   onChange={(e) => handleSettingChange('avatar', 'height', e.target.value)}
                   className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-foreground"
@@ -116,6 +109,7 @@ export default function Settings() {
                 </label>
                 <input
                   type="number"
+                  placeholder="70"
                   value={userSettings.avatar.weight}
                   onChange={(e) => handleSettingChange('avatar', 'weight', e.target.value)}
                   className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-foreground"
@@ -131,6 +125,7 @@ export default function Settings() {
                 </label>
                 <input
                   type="number"
+                  placeholder="40"
                   value={userSettings.avatar.measurements.chest}
                   onChange={(e) => handleSettingChange('avatar', 'measurements', {
                     ...userSettings.avatar.measurements,
@@ -146,6 +141,7 @@ export default function Settings() {
                 </label>
                 <input
                   type="number"
+                  placeholder="32"
                   value={userSettings.avatar.measurements.waist}
                   onChange={(e) => handleSettingChange('avatar', 'measurements', {
                     ...userSettings.avatar.measurements,
@@ -161,6 +157,7 @@ export default function Settings() {
                 </label>
                 <input
                   type="number"
+                  placeholder="38"
                   value={userSettings.avatar.measurements.hips}
                   onChange={(e) => handleSettingChange('avatar', 'measurements', {
                     ...userSettings.avatar.measurements,
